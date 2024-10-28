@@ -10,7 +10,7 @@
   - 브라우저와 Node.js에서 모두 사용가능 (최신 JavaScript 표준)
   - 모듈을 비동기적으로 로드
   - `import`와 `export` 키워드를 사용
-  📌 package.json에 `"type": "module"` 넣으면 사용 가능
+  - 📌 package.json에 `"type": "module"` 넣으면 사용 가능
   
   > Node.js 생태계는 ESM으로 있음
  다만.. https://velog.io/@runprogrmm/CommonJs%EC%99%80-ECMAScript-ModulesESM
