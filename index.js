@@ -1,13 +1,12 @@
-const express = require("express");
+import express from "express"; 
+import Redis from 'ioredis';
+import { v4 as uuidv4 } from 'uuid';
+import { randomNumber } from "./modules/randomNumber.js";
+
 const app = express();
 const port = 8080;
-const bodyParser = require('body-parser');
-const Redis = require('ioredis');
-const { v4: uuidv4 } = require('uuid');
-
 const redis = new Redis();
-
-app.use(bodyParser.json());
+app.use(express.json());
 
 redis.on('error', (err) => {
   console.error('Redis error: ', err);
@@ -23,6 +22,8 @@ app.post("/room", async (req, res) => {
   const roomInfo = {
     roomCode: roomCode,
     createdAt: new Date().toISOString(),
+    targetNumber: randomNumber(),
+    attempt : 0
   };
 
   try {
@@ -31,6 +32,31 @@ app.post("/room", async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: '방 생성 실패' });
   }
+});
+
+app.get("/room/:roomCode", async(req, res) => {
+  const { roomCode }  = req.params;
+  redis.get(`room:${roomCode}`, (err, values) => {
+    if(err){
+      return res.status(400).json({ error : '키 조회 실패'});
+    } else {
+      const valuesJSON = JSON.parse(values)
+      const targetNumber = valuesJSON.targetNumber
+      // console.log(values, typeof(values));
+      return res.status(200).json({ status : '연결 성공', targetNumber : targetNumber});
+    }
+  })
+})
+
+app.get("/all", (req, res) => {
+  redis.keys('*', (err, keys) => {
+    if (err) {
+      console.error('키 조회 오류:', err);
+      return res.status(500).json({ error: '키 조회 실패' });
+    } else {
+      return res.json({ keys });
+    }
+  });
 });
 
 app.listen(port, () => {
