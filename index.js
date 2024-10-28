@@ -40,10 +40,12 @@ app.get("/room/:roomCode", async(req, res) => {
     if(err){
       return res.status(400).json({ error : '키 조회 실패'});
     } else {
-      const valuesJSON = JSON.parse(values)
-      const targetNumber = valuesJSON.targetNumber
+      const roomInfo = JSON.parse(values)
+      const targetNumber = roomInfo.targetNumber
+      roomInfo.attempt += 1;
+      redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
       // console.log(values, typeof(values));
-      return res.status(200).json({ status : '연결 성공', targetNumber : targetNumber});
+      return res.status(200).json({ status : '연결 성공', roomInfo : roomInfo});
     }
   })
 })
