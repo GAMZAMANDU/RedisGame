@@ -39,9 +39,10 @@ app.get("/room/:roomCode", async(req, res) => {
   redis.get(`room:${roomCode}`, (err, values) => {
     if(err){
       return res.status(400).json({ error : '키 조회 실패'});
-    } else {
+    } 
+    else{
+      const targetNumber = roomInfo.query.targetNumber
       const roomInfo = JSON.parse(values)
-      const targetNumber = roomInfo.targetNumber
       roomInfo.attempt += 1;
       redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
       // console.log(values, typeof(values));
