@@ -6,6 +6,7 @@ import { randomNumber } from "./modules/randomNumber.js";
 const app = express();
 const port = 8080;
 const redis = new Redis();
+
 app.use(express.json());
 
 redis.on('error', (err) => {
@@ -18,7 +19,6 @@ app.get("/", (req, res) => {
 
 app.post("/room", async (req, res) => {
   const roomCode = uuidv4();
-
   const roomInfo = {
     roomCode: roomCode,
     createdAt: new Date().toISOString(),
@@ -28,45 +28,47 @@ app.post("/room", async (req, res) => {
 
   try {
     await redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
-    res.json({ message: '방이 생성되었습니다.', roomCode: roomCode });
+    res.status(201).json({ message: '방이 생성되었습니다.', roomCode });
   } catch (err) {
-    return res.status(500).json({ error: '방 생성 실패' });
+    res.status(500).json({ error: '방 생성 실패' });
   }
 });
 
 app.get("/room/:roomCode", async(req, res) => {
   const { roomCode }  = req.params;
-  redis.get(`room:${roomCode}`, (err, values) => {
-    if(err){
-      return res.status(400).json({ error : '키 조회 실패'});
-    } 
-    else{
-      const tryNumber = req.query.tryNumber
-      const roomInfo = JSON.parse(values)
-      const targetNumber = roomInfo.targetNumber
-      roomInfo.attempt += 1;
-      redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
-      // console.log(values, typeof(values));
-      if(targetNumber == tryNumber){
-        redis.del(`room:${roomCode}`)
-        return res.status(200).json({ status : '일치하지 했습니다', roomInfo : roomInfo});
-      }else{
-        return res.status(200).json({ status : '일치하지 않음', roomInfo : roomInfo});
-      }
-
+  const tryNumber = req.query.tryNumber
+  
+  try{
+    const roomData = await redis.get(`room:${roomCode}`);
+    if(!roomData){
+      return res.status(404).json({ error: '방을 찾을 수 없습니다.' });
     }
-  })
-})
 
-app.get("/all", (req, res) => {
-  redis.keys('*', (err, keys) => {
-    if (err) {
-      console.error('키 조회 오류:', err);
-      return res.status(500).json({ error: '키 조회 실패' });
-    } else {
-      return res.json({ keys });
+    const roomInfo = JSON.parse(roomData)
+    roomInfo.attempt += 1;
+    const targetNumber = roomInfo.targetNumber
+
+    if(targetNumber == tryNumber){
+      await redis.del(`room:${roomCode}`)
+      return res.status(200).json({ status : '일치하지 했습니다', roomInfo : roomInfo});
+    }else{
+      await redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
+      return res.status(200).json({ status : '일치하지 않음', roomInfo : roomInfo});
     }
-  });
+  } catch (err) {
+    console.error("방 정보 조회 실패:", err);
+    res.status(500).json({ error: '방 정보 조회 실패' });
+  }
+});
+
+app.get("/all", async (req, res) => {
+  try {
+    const keys = await redis.keys('room:*');
+    res.status(200).json({ keys });
+  } catch (err) {
+    console.error("키 조회 오류:", err);
+    res.status(500).json({ error: '키 조회 실패' });
+  }
 });
 
 app.listen(port, () => {
