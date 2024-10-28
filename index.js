@@ -41,12 +41,19 @@ app.get("/room/:roomCode", async(req, res) => {
       return res.status(400).json({ error : '키 조회 실패'});
     } 
     else{
-      const targetNumber = roomInfo.query.targetNumber
+      const tryNumber = req.query.tryNumber
       const roomInfo = JSON.parse(values)
+      const targetNumber = roomInfo.targetNumber
       roomInfo.attempt += 1;
       redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
       // console.log(values, typeof(values));
-      return res.status(200).json({ status : '연결 성공', roomInfo : roomInfo});
+      if(targetNumber == tryNumber){
+        redis.del(`room:${roomCode}`)
+        return res.status(200).json({ status : '일치하지 했습니다', roomInfo : roomInfo});
+      }else{
+        return res.status(200).json({ status : '일치하지 않음', roomInfo : roomInfo});
+      }
+
     }
   })
 })
