@@ -35,6 +35,23 @@ app.post("/room", async (req, res) => {
   }
 });
 
+app.get("/room/TTL/:roomCode", async (req, res) => {
+  const { roomCode } = req.params;
+
+  try {
+    const ttl = await redis.ttl(`room:${roomCode}`);
+    
+    if (ttl === -2) {
+      return res.status(404).json({ error: '해당 방이 존재하지 않습니다.' });
+    }
+
+    return res.status(200).json({ ttl: ttl });
+  } catch (error) {
+    console.error(error); // 오류 로그 출력
+    return res.status(500).json({ error: '뭔가뭔가 오류가 남' });
+  }
+});
+
 app.get("/room/:roomCode", async(req, res) => {
   const { roomCode }  = req.params;
   const tryNumber = req.query.tryNumber
