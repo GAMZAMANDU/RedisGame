@@ -8,9 +8,9 @@ import {
 
 const router = express.Router();
 
-router.post('/', createRoom);
 router.get('/TTL/:roomCode', getRoomTTL);
 router.get('/all', getAllRooms);
 router.get('/:roomCode', getRoomInfo);
+router.post('/', createRoom);
 
 export default router;
