@@ -28,6 +28,7 @@ app.post("/room", async (req, res) => {
 
   try {
     await redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
+    await redis.expire(`room:${roomCode}`, 300);
     return res.status(201).json({ message: '방이 생성되었습니다.', roomCode });
   } catch (err) {
     return res.status(500).json({ error: '방 생성 실패' });
