@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "nodemon app.js"
+  },
   "type": "module",
   "dependencies": {
     "express": "^4.21.1",

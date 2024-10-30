@@ -48,11 +48,14 @@ export const getRoomInfo = async (req, res) => {
 
     const roomInfo = JSON.parse(roomData);
     roomInfo.attempt += 1;
-
+    
     if (roomInfo.targetNumber == tryNumber) {
       await redis.del(`room:${roomCode}`);
-      await redis.zadd("leaderboard",roomInfo.attempt,roomInfo.roomCode);
-      return res.status(200).json({ status: '일치했습니다', roomInfo });
+      console.log(roomInfo);
+      const registerRankData = {roomCode : roomInfo.roomCode, attempt : roomInfo.attempt}
+      const registerRankInfo = await redis.zadd("leaderboard",roomInfo.attempt, JSON.stringify(registerRankData));
+      
+      return res.status(200).json({ status: '일치했습니다', registerRankData });
     } else {
       await redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));
       return res.status(200).json({ status: '일치하지 않음', roomInfo });
