@@ -51,6 +51,7 @@ export const getRoomInfo = async (req, res) => {
 
     if (roomInfo.targetNumber == tryNumber) {
       await redis.del(`room:${roomCode}`);
+      await redis.zadd("leaderboard",roomInfo.attempt,roomInfo.roomCode);
       return res.status(200).json({ status: '일치했습니다', roomInfo });
     } else {
       await redis.set(`room:${roomCode}`, JSON.stringify(roomInfo));

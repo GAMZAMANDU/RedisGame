@@ -1,10 +1,12 @@
 import express from 'express';
 import roomRoutes from './routes/roomRoutes.js';
+import rankRoutes from './routes/rankRoutes.js';
 
 const app = express();
 const port = 8080;
 
 app.use(express.json());
+app.use('/rank', rankRoutes);
 app.use('/room', roomRoutes);
 
 app.listen(port, () => {
