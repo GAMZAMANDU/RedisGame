@@ -1,9 +1,20 @@
-import assert from 'assert';
+import * as chaiModule from "chai";
+import chaiHttp from "chai-http";
 
-describe("pow", function() {
+const chai = chaiModule.use(chaiHttp);
+import {server} from '../index.js';
 
-  it("주어진 숫자의 n 제곱", function() {
-    assert.equal(pow(2, 3), 8);
+const { expect } = chai;
+
+
+describe("생성 API 테스트", () => {
+  it("GET /room should return a 200 status", (done) => {
+    chai.request.execute(server)
+      .get('/room')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('object');
+        done();
+      });
   });
-
 });
