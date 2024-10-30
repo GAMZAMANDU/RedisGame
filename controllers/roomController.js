@@ -50,9 +50,11 @@ export const getRoomInfo = async (req, res) => {
     roomInfo.attempt += 1;
     
     if (roomInfo.targetNumber == tryNumber) {
+      // 게임이 종료된 room은 delete
       await redis.del(`room:${roomCode}`);
-      console.log(roomInfo);
+      //rank에 필요한 데이터 객체
       const registerRankData = {roomCode : roomInfo.roomCode, attempt : roomInfo.attempt}
+      //rank에 데이터 등록
       const registerRankInfo = await redis.zadd("leaderboard",roomInfo.attempt, JSON.stringify(registerRankData));
       
       return res.status(200).json({ status: '일치했습니다', registerRankData });

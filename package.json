@@ -1,11 +1,16 @@
 {
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test" : "mocha"
   },
   "type": "module",
   "dependencies": {
     "express": "^4.21.1",
     "ioredis": "^5.4.1",
     "uuid": "^11.0.1"
+  },
+  "devDependencies": {
+    "chai": "^5.1.2",
+    "mocha": "^10.8.1"
   }
 }
